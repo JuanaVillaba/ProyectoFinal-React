@@ -5,6 +5,7 @@ import Screen from '@/components/ui/Screen';
 import EstadoBadge from '@/components/incidencia/EstadoBadge';
 import { incidenciasMock } from '@/features/incidencias/mock';
 import { Incidencia } from '@/features/incidencias/mock';
+import { Stack } from 'expo-router';
 
 export default function IncidenciaDetalle() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -23,13 +24,20 @@ export default function IncidenciaDetalle() {
 
   return (
     <Screen>
+      <Stack.Screen options={{title:"Incidente", headerTitleAlign:"center",}}/>
+
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{incidencia.titulo}</Text>
+          
+          
+          
+          
           <EstadoBadge estado={incidencia.estado} />
         </View>
-
+        <Text>Servicio: {incidencia.servicio}</Text>
+        <Text>Fecha del reporte: {incidencia.fecha}</Text>
         {/* Descripción */}
         <Section title="Descripción">
           <Text style={styles.text}>{incidencia.descripcion}</Text>
@@ -40,8 +48,9 @@ export default function IncidenciaDetalle() {
           <Text style={styles.text}>{formatFecha(incidencia.fecha)}</Text>
         </Section>
 
+        <Text style={styles.texto}>Estado actual</Text>
         {/* Timeline */}
-        <Section title="Seguimiento">
+        <Section title="">
           <Timeline estado={incidencia.estado} />
         </Section>
       </View>
@@ -165,4 +174,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 50,
   },
+  texto:{
+            fontWeight: "bold",
+            marginTop: 5,
+            marginBottom:5  
+        },
 });

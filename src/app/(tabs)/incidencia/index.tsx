@@ -21,7 +21,7 @@ export default function IncidenciasScreen() {
       {/* Botón flotante */}
       <Pressable
         style={styles.fab}
-        onPress={() => router.push('/incidencia/crear')}
+        onPress={() => router.push("/incidentes")}
       >
         <Ionicons name="add" size={28} color="#fff" />
       </Pressable>

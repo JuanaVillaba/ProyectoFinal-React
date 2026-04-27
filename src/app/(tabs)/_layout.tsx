@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+      <Tabs screenOptions={{ headerShown: true }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -14,16 +14,18 @@ export default function TabsLayout() {
           ),
         }}
       />
-
+      
       <Tabs.Screen
-        name="incidencias"
+        name="incidencia"
         options={{
-          title: 'Incidencias',
+          title: 'Incidencia',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="warning" size={size} color={color} />
           ),
         }}
       />
+      
+        <Tabs.Screen name="incidentes" options={{href: null}}/>
 
       <Tabs.Screen
         name="servicios"
@@ -55,5 +57,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    
   );
 }
