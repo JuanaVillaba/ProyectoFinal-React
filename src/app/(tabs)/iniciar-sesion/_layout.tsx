@@ -7,7 +7,7 @@ export default function IniciarSesionLayout() {
     <SafeAreaProvider>
       <Stack screenOptions={{ headerShown: false }}>
         
-        <Stack.Screen name="iniciar-sesion" options={{ headerShown: true, title: 'Registro' }} />
+        <Stack.Screen name="iniciar-sesion" options={{ headerShown: false, title: 'Registro' }} />
 
       </Stack>
     </SafeAreaProvider>

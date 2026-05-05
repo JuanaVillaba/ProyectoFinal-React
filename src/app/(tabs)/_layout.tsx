@@ -26,8 +26,8 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen name="incidentes" options={{href: null}}/>
-      <Tabs.Screen name="iniciar-sesion" options={{href: null}}/>
-      <Tabs.Screen name="registrar-usuario" options={{href: null}}/>
+      <Tabs.Screen name="iniciar-sesion" options={{href: null, headerShown: false}}/>
+      <Tabs.Screen name="registrar-usuario" options={{href: null, headerShown:false}}/>
       <Tabs.Screen
         name="servicios"
         options={{
