@@ -16,9 +16,9 @@ export default function TabsLayout() {
       />
       
       <Tabs.Screen
-        name="incidencia"
+        name="lista-incidentes"
         options={{
-          title: 'Incidencia',
+          title: 'Incidentes',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="warning" size={size} color={color} />
           ),

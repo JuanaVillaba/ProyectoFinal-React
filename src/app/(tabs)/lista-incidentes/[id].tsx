@@ -7,7 +7,7 @@ import { incidenciasMock } from '@/features/incidencias/mock';
 import { Incidencia } from '@/features/incidencias/mock';
 import { Stack } from 'expo-router';
 
-export default function IncidenciaDetalle() {
+export default function ListaIncidentesDetalle() {
   const params = useLocalSearchParams<{ id: string }>();
 
   const incidencia: Incidencia | undefined = useMemo(() => {

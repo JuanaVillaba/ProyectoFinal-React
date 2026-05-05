@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 
-export default function IncidenciasScreen() {
+export default function ListaIncidentesScreen() {
   const router = useRouter();
 
   return (
