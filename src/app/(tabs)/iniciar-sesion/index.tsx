@@ -4,19 +4,32 @@ import { Text } from "react-native"
 import { TextInput, Button, Card } from "react-native-paper"
 import { StyleSheet, Image, View } from "react-native";
 import perfil from "assets/img/usuario-perfil.jpg";
-import { ChangeEvent } from "react"
+import { ChangeEvent, useState } from "react"
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function IniciarSesion() {
     const router = useRouter();
     const styles = StyleSheet.create({
+        fondo:{
+            flex: 1
+        },
         card: {
             backgroundColor: "#EBDBFE",
+            width: "100%",
+            maxWidth: 1350,
         },
         inputs: {
             width: 300,
             alignSelf: "center",
             backgroundColor: "white",
-            marginBottom: 15
+            marginBottom: 15,
+            marginLeft:20,
+            marginRight:20,
+            borderColor: "#6422b4",
+            borderRadius: 15,
+            borderTopLeftRadius:15,
+            borderTopRightRadius:15,
+            borderWidth: 2,
         },
         imagen: {
             width: 80,
@@ -41,17 +54,32 @@ export default function IniciarSesion() {
         },
         button: {
             marginTop: 15,
-            backgroundColor: "#D2AFFD"
+            backgroundColor: "#D2AFFD",
+            width: "100%",
+            maxWidth: 1350,
+            color: "black"
+        },
+        textoBoton:{
+            color: "#6422b4",
+            fontWeight: "bold"
         },
         centrar:{
+            flex: 1,
             flexDirection: "column",
-            alignContent: "center",
+            alignSelf: "center",
             justifyContent: "center",
         }
     })
+    const [correoIngresado, setCorreoIngresado] = useState<string>("");
+    const [contraseñaIngresada, setContraseñaIngresada] = useState<string>("");
+    const ingresar = {
+            correo: correoIngresado,
+            contreña: contraseñaIngresada
+    }
     return (
         <Screen>
             <Stack.Screen options={{ headerShown: false }} />
+            <LinearGradient colors={["#3f7ae8", "#6422b4"]} style={styles.fondo}>
             <View style={styles.centrar}>
                 <Card style={styles.card}>
                     <Image style={styles.imagen} source={perfil} />
@@ -65,8 +93,9 @@ export default function IniciarSesion() {
                         <Text style={styles.olvidar}>¿Olvidaste la contraseña?</Text>
                     </View>
                 </Card>
-                <Button style={styles.button} onPress={() => router.push("/(tabs)")}>Iniciar Sesion</Button>
+                <Button style={styles.button}  labelStyle={styles.textoBoton} onPress={() => router.push("/(tabs)")}>Iniciar Sesion</Button>
             </View>
+            </LinearGradient>
         </Screen>
     )
 }
