@@ -6,8 +6,9 @@ import { StyleSheet, Image, View } from "react-native";
 import perfil from "assets/img/usuario-perfil.jpg";
 import { ChangeEvent, useState } from "react"
 import { LinearGradient } from "expo-linear-gradient";
-import { usuario } from "@/supabase/usuario";
-
+import { supabase } from "@/supabase/supabase";
+import { useAuth } from "@/hooks/useAuth";
+ 
 export default function IniciarSesion() {
     const router = useRouter();
     const styles = StyleSheet.create({
@@ -71,21 +72,20 @@ export default function IniciarSesion() {
             justifyContent: "center",
         }
     })
-    const [correoIngresado, setCorreoIngresado] = useState<string>("");
-    const [contraseñaIngresada, setContraseñaIngresada] = useState<string>("");
+    
     //const ingresar = {
     //        correo: correoIngresado,
     //        contreña: contraseñaIngresada
     //}
-    async function iniciar() {
-        const { data, error } = await usuario.auth.signInWithPassword({
-            email: correoIngresado,
-            password: contraseñaIngresada,
-        });
-        error?
-        console.error("Error en iniciar sesion" + error):
-        router.push("/(tabs)");
-    }
+     
+        const { signIn, loading, error} = useAuth();
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const iniciar = async () =>{
+            await signIn({email, password})
+            router.push("(tabs)");
+        }
+    
     return (
         <Screen>
             <Stack.Screen options={{ headerShown: false }} />
@@ -93,9 +93,9 @@ export default function IniciarSesion() {
                 <View style={styles.centrar}>
                     <Card style={styles.card}>
                         <Image style={styles.imagen} source={perfil} />
-                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setCorreoIngresado(valor)}
+                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setEmail(valor)}
                             placeholder="Ingrese corro electronico"></TextInput>
-                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setContraseñaIngresada(valor)}
+                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setPassword(valor)}
                             secureTextEntry placeholder="Ingrese contraseña"></TextInput>
                         <View style={styles.guardarOlvidar}>
                             <View style={styles.guardar}>
