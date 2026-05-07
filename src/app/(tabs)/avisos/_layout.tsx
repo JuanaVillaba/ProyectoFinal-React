@@ -7,8 +7,8 @@ export default function AvisosLayout() {
     <SafeAreaProvider>
         
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="avisos" options={{ headerShown: true, title: "Avisos" }} />
+      <Stack.Screen name="(tabs)" />
+       
         
       </Stack>
     </SafeAreaProvider>
