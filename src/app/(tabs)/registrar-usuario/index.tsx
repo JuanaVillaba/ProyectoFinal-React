@@ -1,15 +1,16 @@
 import Screen from "@/components/ui/Screen";
 import { useRouter, Stack } from "expo-router";
 import { Text } from "react-native";
-import { TextInput, Button, Card } from "react-native-paper";
+import { TextInput, Button, Card, Checkbox } from "react-native-paper";
 import { StyleSheet, Image, View } from "react-native";
 import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import { usuario } from "@/supabase/usuario";
 
 export default function RegistrarUsuarioScreen() {
     const router = useRouter();
     const styles = StyleSheet.create({
-        fondo:{
+        fondo: {
             backgroundColor: "#F3E8FF",
             flex: 1
         },
@@ -35,7 +36,7 @@ export default function RegistrarUsuarioScreen() {
             marginTop: 15,
             backgroundColor: "#D2AFFD"
         },
-        textoBoton:{
+        textoBoton: {
             color: "#6422b4",
             fontWeight: "bold"
         },
@@ -69,57 +70,80 @@ export default function RegistrarUsuarioScreen() {
     const [direcionIngresada, setDirecionIngresada] = useState<string>("");
     const [pisoIngresado, setPisoIngresado] = useState<string>("");
     const [letraOnumeroIngresado, setLetraOnumeroIngresado] = useState<string>("");
-    const registrar = {
-        nombre: nombreIngresado,
-        correo: correoIngresado,
-        contraseña: contraseñaIngresada,
-        direccion: direcionIngresada,
-        piso: pisoIngresado,
-        letraOnumero: letraOnumeroIngresado
-    };
+    const [terminos, setTerminos]= useState(false);
+    //const registrarAS = {
+    //    nombre: nombreIngresado,
+    //    correo: correoIngresado,
+    //    contraseña: contraseñaIngresada,
+    //    direccion: direcionIngresada,
+    //    piso: pisoIngresado,
+    //    letraOnumero: letraOnumeroIngresado
+    //};
+    async function registrar() {
+        if(!terminos){
+            alert("Debes aceptar los terminos obligatoriamente al crear el usuario")
+            return;
+        }
+        const { data, error } = await usuario.auth.signUp({
+            email: correoIngresado,
+            password: contraseñaIngresada,
+            options:{
+                data: {
+                    nombre: nombreIngresado,
+                    direccion: direcionIngresada,
+                    piso: pisoIngresado,
+                    letraOnumero: letraOnumeroIngresado,
+                },
+            }
+        });
+        error?
+        console.error("Error en registrar usuario" + error):
+        router.push("/(tabs)");
+    }
     return (
         <Screen>
             <Stack.Screen options={{ headerTitleAlign: "center" }} />
             <LinearGradient colors={["#3f7ae8", "#6422b4"]} style={styles.fondo}>
                 <View style={styles.centrar}>
-                <Card style={styles.card}>
-                    <Text style={styles.titulo}>Iniciar sesion</Text>
-                    <TextInput style={styles.inputs} value={nombreIngresado}
-                        onChangeText={(valor: string) => setNombreIngresado(valor)}
-                        placeholder="Ingrese nombre"
-                    ></TextInput>
+                    <Card style={styles.card}>
+                        <Text style={styles.titulo}>Iniciar sesion</Text>
+                        <TextInput style={styles.inputs} value={nombreIngresado}
+                            onChangeText={(valor: string) => setNombreIngresado(valor)}
+                            placeholder="Ingrese nombre"
+                        ></TextInput>
 
-                    <TextInput style={styles.inputs} value={correoIngresado}
-                        onChangeText={(valor: string) => setCorreoIngresado(valor)}
-                        placeholder="Ingrese corro electronico"></TextInput>
+                        <TextInput style={styles.inputs} value={correoIngresado}
+                            onChangeText={(valor: string) => setCorreoIngresado(valor)}
+                            keyboardType="email-address"
+                            placeholder="Ingrese corro electronico"></TextInput>
 
-                    <TextInput style={styles.inputs} value={contraseñaIngresada}
-                        onChangeText={(valor: string) => setContraseñaIngresada(valor)}
-                        placeholder="Ingrese contraseña"></TextInput>
+                        <TextInput style={styles.inputs} value={contraseñaIngresada}
+                            onChangeText={(valor: string) => setContraseñaIngresada(valor)}
+                            secureTextEntry placeholder="Ingrese contraseña"></TextInput>
 
-                    <TextInput style={styles.inputs} value={direcionIngresada}
-                        onChangeText={(valor: string) => setDirecionIngresada(valor)}
-                        placeholder="Ingrese direccion"></TextInput>
+                        <TextInput style={styles.inputs} value={direcionIngresada}
+                            onChangeText={(valor: string) => setDirecionIngresada(valor)}
+                            placeholder="Ingrese direccion"></TextInput>
 
-                    <TextInput style={styles.inputs} value={pisoIngresado}
-                        onChangeText={(valor: string) => setPisoIngresado(valor)}
-                        placeholder="Ingrese piso"></TextInput>
+                        <TextInput style={styles.inputs} value={pisoIngresado}
+                            onChangeText={(valor: string) => setPisoIngresado(valor)}
+                            placeholder="Ingrese piso"></TextInput>
 
-                    <TextInput style={styles.inputs} value={letraOnumeroIngresado}
-                        onChangeText={(valor: string) => setLetraOnumeroIngresado(valor)}
-                        placeholder="Ingrese letra o numero"></TextInput>
-                    <View style={styles.aceptar}>
-                        <input type="checkbox" id="" />
-                        <Text style={styles.texto}>Acepta los terminos y condiciones</Text>
-                    </View>
+                        <TextInput style={styles.inputs} value={letraOnumeroIngresado}
+                            onChangeText={(valor: string) => setLetraOnumeroIngresado(valor)}
+                            placeholder="Ingrese letra o numero"></TextInput>
+                        <View style={styles.aceptar}>
+                            <Checkbox status={terminos ? "checked":"unchecked"} onPress={()=>{ setTerminos(!terminos)}}/>
+                            <Text style={styles.texto}>Acepta los terminos y condiciones</Text>
+                        </View>
 
-                </Card>
+                    </Card>
 
-                <Button style={styles.button} labelStyle={styles.textoBoton} onPress={() => router.push("/(tabs)")}>Registrar</Button>
+                    <Button style={styles.button} labelStyle={styles.textoBoton} onPress={registrar}>Registrar</Button>
 
-            </View>
+                </View>
             </LinearGradient>
-            
+
         </Screen>
     )
 }

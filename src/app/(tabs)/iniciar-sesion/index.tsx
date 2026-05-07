@@ -6,11 +6,12 @@ import { StyleSheet, Image, View } from "react-native";
 import perfil from "assets/img/usuario-perfil.jpg";
 import { ChangeEvent, useState } from "react"
 import { LinearGradient } from "expo-linear-gradient";
+import { usuario } from "@/supabase/usuario";
 
 export default function IniciarSesion() {
     const router = useRouter();
     const styles = StyleSheet.create({
-        fondo:{
+        fondo: {
             flex: 1
         },
         card: {
@@ -23,12 +24,12 @@ export default function IniciarSesion() {
             alignSelf: "center",
             backgroundColor: "white",
             marginBottom: 15,
-            marginLeft:20,
-            marginRight:20,
+            marginLeft: 20,
+            marginRight: 20,
             borderColor: "#6422b4",
             borderRadius: 15,
-            borderTopLeftRadius:15,
-            borderTopRightRadius:15,
+            borderTopLeftRadius: 15,
+            borderTopRightRadius: 15,
             borderWidth: 2,
         },
         imagen: {
@@ -59,11 +60,11 @@ export default function IniciarSesion() {
             maxWidth: 1350,
             color: "black"
         },
-        textoBoton:{
+        textoBoton: {
             color: "#6422b4",
             fontWeight: "bold"
         },
-        centrar:{
+        centrar: {
             flex: 1,
             flexDirection: "column",
             alignSelf: "center",
@@ -72,29 +73,40 @@ export default function IniciarSesion() {
     })
     const [correoIngresado, setCorreoIngresado] = useState<string>("");
     const [contraseñaIngresada, setContraseñaIngresada] = useState<string>("");
-    const ingresar = {
-            correo: correoIngresado,
-            contreña: contraseñaIngresada
+    //const ingresar = {
+    //        correo: correoIngresado,
+    //        contreña: contraseñaIngresada
+    //}
+    async function iniciar() {
+        const { data, error } = await usuario.auth.signInWithPassword({
+            email: correoIngresado,
+            password: contraseñaIngresada,
+        });
+        error?
+        console.error("Error en iniciar sesion" + error):
+        router.push("/(tabs)");
     }
     return (
         <Screen>
             <Stack.Screen options={{ headerShown: false }} />
             <LinearGradient colors={["#3f7ae8", "#6422b4"]} style={styles.fondo}>
-            <View style={styles.centrar}>
-                <Card style={styles.card}>
-                    <Image style={styles.imagen} source={perfil} />
-                    <TextInput style={styles.inputs} placeholder="Ingrese corro electronico"></TextInput>
-                    <TextInput style={styles.inputs} placeholder="Ingrese contraseña"></TextInput>
-                    <View style={styles.guardarOlvidar}>
-                        <View style={styles.guardar}>
-                            <input type="checkbox" id="" />
-                            <Text>Guardar sesion</Text>
+                <View style={styles.centrar}>
+                    <Card style={styles.card}>
+                        <Image style={styles.imagen} source={perfil} />
+                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setCorreoIngresado(valor)}
+                            placeholder="Ingrese corro electronico"></TextInput>
+                        <TextInput style={styles.inputs} onChangeText={(valor: string) => setContraseñaIngresada(valor)}
+                            secureTextEntry placeholder="Ingrese contraseña"></TextInput>
+                        <View style={styles.guardarOlvidar}>
+                            <View style={styles.guardar}>
+                                <input type="checkbox" id="" />
+                                <Text>Guardar sesion</Text>
+                            </View>
+                            <Text style={styles.olvidar}>¿Olvidaste la contraseña?</Text>
                         </View>
-                        <Text style={styles.olvidar}>¿Olvidaste la contraseña?</Text>
-                    </View>
-                </Card>
-                <Button style={styles.button}  labelStyle={styles.textoBoton} onPress={() => router.push("/(tabs)")}>Iniciar Sesion</Button>
-            </View>
+                    </Card>
+                    <Button style={styles.button} labelStyle={styles.textoBoton} onPress={iniciar}>Iniciar Sesion</Button>
+                </View>
             </LinearGradient>
         </Screen>
     )
