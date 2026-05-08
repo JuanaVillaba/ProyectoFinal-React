@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase/supabase";
 import { authService, AuthCredentials } from "@/services/auth.service";
 
 export function useAuth() {
-    const [sesion, setSession] = useState<Session | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Session | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -22,21 +22,27 @@ export function useAuth() {
     },[])
 
     const signIn = async (creds: AuthCredentials)=>{
-        setError(null)
+        setError(null);
+        setLoading(true);
         try{
             await authService.signIn(creds)
         } catch (e: any){
             setError(e.message)
+            throw e; 
+        } finally {
+            setLoading(false);
         }
     }
     const signUp = async (creds: AuthCredentials)=>{
-        setError(null)
+        setError(null);
+        setLoading(true);
         try{
             await authService.signUp(creds)
         } catch (e: any){
-            setError(e.message)
+            setError(e.message);
         }
     }
     const signOut = () => authService.signOut()
-    return {sesion, loading, error, signIn, signUp, signOut }
+
+    return {session, loading, error, signIn, signUp, signOut}
 }

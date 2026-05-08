@@ -1,14 +1,14 @@
 import Screen from "@/components/ui/Screen"
 import { useRouter, Stack } from "expo-router"
 import { Text } from "react-native"
-import { TextInput, Button, Card } from "react-native-paper"
+import { TextInput, Button, Card, Checkbox } from "react-native-paper"
 import { StyleSheet, Image, View } from "react-native";
 import perfil from "assets/img/usuario-perfil.jpg";
-import { ChangeEvent, useState } from "react"
+import {  useState } from "react"
 import { LinearGradient } from "expo-linear-gradient";
 import { supabase } from "@/supabase/supabase";
 import { useAuth } from "@/hooks/useAuth";
- 
+
 export default function IniciarSesion() {
     const router = useRouter();
     const styles = StyleSheet.create({
@@ -72,42 +72,42 @@ export default function IniciarSesion() {
             justifyContent: "center",
         }
     })
-    
-    //const ingresar = {
-    //        correo: correoIngresado,
-    //        contreña: contraseñaIngresada
-    //}
-     
-        const { signIn, loading, error} = useAuth();
-        const [email, setEmail] = useState("");
-        const [password, setPassword] = useState("");
-        const iniciar = async () =>{
-            await signIn({email, password})
-            router.push("(tabs)");
+    const { signIn, loading, error, session} = useAuth();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [guardar, setGuardar] = useState(false);
+    const iniciar = async () => {
+        try {
+            console.log("Intentando iniciar sesión");
+            await signIn({ email, password })           
+            router.replace("/(tabs)")
+            
+        } catch (e: any){
+            alert("Correo o contraseña incorrecta");
         }
-    
+    }
     return (
-        <Screen>
-            <Stack.Screen options={{ headerShown: false }} />
+        <View style={{ flex: 1 }}> 
             <LinearGradient colors={["#3f7ae8", "#6422b4"]} style={styles.fondo}>
                 <View style={styles.centrar}>
                     <Card style={styles.card}>
                         <Image style={styles.imagen} source={perfil} />
                         <TextInput style={styles.inputs} onChangeText={(valor: string) => setEmail(valor)}
-                            placeholder="Ingrese corro electronico"></TextInput>
+                            value={email} placeholder="Ingrese correo electronico"></TextInput>
                         <TextInput style={styles.inputs} onChangeText={(valor: string) => setPassword(valor)}
-                            secureTextEntry placeholder="Ingrese contraseña"></TextInput>
+                            value={password} secureTextEntry placeholder="Ingrese contraseña"></TextInput>
                         <View style={styles.guardarOlvidar}>
                             <View style={styles.guardar}>
-                                <input type="checkbox" id="" />
+                                <Checkbox status={guardar ? "checked" : "unchecked"} onPress={() => { setGuardar(!guardar) }} />
                                 <Text>Guardar sesion</Text>
                             </View>
                             <Text style={styles.olvidar}>¿Olvidaste la contraseña?</Text>
                         </View>
                     </Card>
-                    <Button style={styles.button} labelStyle={styles.textoBoton} onPress={iniciar}>Iniciar Sesion</Button>
+                    <Button style={styles.button} labelStyle={styles.textoBoton} onPress={iniciar}
+                        loading={loading} disabled={loading}>Iniciar Sesion</Button>
                 </View>
             </LinearGradient>
-        </Screen>
+        </View>
     )
 }

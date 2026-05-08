@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/supabase/supabase";
 
 export type AuthCredentials={
     email : string,
@@ -19,7 +19,10 @@ export const authService={
     },
     signIn: async ({email, password}: AuthCredentials)=>{
         const{data, error } =await supabase.auth.signInWithPassword({email,password})
-        if (error) throw error
+        if (error){
+             console.log("Error en Service:", error.message)
+             throw error
+        }
         return data
     },
     signOut: async ()=>{
