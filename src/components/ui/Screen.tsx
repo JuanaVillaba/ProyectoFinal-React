@@ -1,15 +1,19 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ScreenProps = {
   children: React.ReactNode;
+  style?: ViewStyle;
+  noPadding?: boolean;
 };
 
-export default function Screen({ children }: ScreenProps) {
+export default function Screen({ children, style, noPadding }: ScreenProps) {
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'right', 'left', 'bottom']}>
-      <View style={styles.body}>{children}</View>
+    <SafeAreaView style={[styles.safe, style]} edges={['top', 'right', 'left', 'bottom']}>
+      <View style={[styles.body, noPadding && styles.noPadding]}>
+        {children}
+      </View>
     </SafeAreaView>
   );
 }
@@ -22,5 +26,8 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     padding: 16,
+  },
+  noPadding: {
+    padding: 0,
   },
 });
