@@ -1,20 +1,40 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
-
-const TABS: {
-  name: string;
-  title: string;
-  icon: IoniconsName;
-  iconActive: IoniconsName;
-}[] = [
-  { name: 'index',      title: 'Inicio',      icon: 'home-outline',          iconActive: 'home'           },
-  { name: 'incidencia', title: 'Incidentes',  icon: 'warning-outline',       iconActive: 'warning'        },
-  { name: 'avisos',     title: 'Avisos',      icon: 'megaphone-outline',     iconActive: 'megaphone'      },
-  { name: 'servicios',  title: 'Servicios',   icon: 'flash-outline',         iconActive: 'flash'          },
-  { name: 'perfil',     title: 'Perfil',      icon: 'person-circle-outline', iconActive: 'person-circle'  },
-];
+export default function TabsLayout() {
+  return (
+      <Tabs screenOptions={{ headerShown: true }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Inicio',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      
+      <Tabs.Screen
+        name="incidencia"
+        options={{
+          title: 'Incidencia',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="warning" size={size} color={color} />
+          ),
+        }}
+      />
+      
+      <Tabs.Screen name="incidentes" options={{href: null, title:"incidentes"}}/>
+      
+      <Tabs.Screen
+        name="servicios"
+        options={{
+          title: 'Servicios',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="flash" size={size} color={color} />
+          ),
+        }}
+      />
 
 export default function TabsLayout() {
   return (
