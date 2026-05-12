@@ -13,6 +13,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '@/components/ui/Screen';
 
+import { crearReserva } from '@/services/reservas';
+import { registrarUsuario } from '@/services/usuarios';
 // ─── Paleta central ───────────────────────────────────────────────────────────
 const C = {
   navy:        '#1a2744',
@@ -92,7 +94,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     icon:      'calendar-outline',
     bg:        C.greenBg,
     iconColor: C.green,
-    route:     '/(tabs)/servicios',
+    route:     '/(tabs)/reservas',
   },
   {
     label:     'Visitas',
@@ -358,6 +360,7 @@ export default function Home() {
 
       </ScrollView>
     </Screen>
+    
   );
 }
 

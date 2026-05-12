@@ -14,6 +14,7 @@ import {
   ESTADO_META,
   PRIORIDAD_META,
 } from '@/features/incidencias/incidencia.store';
+//import { crearReserva } from '@/services/reservas';
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 const STEPS: { key: EstadoIncidencia; label: string; sub: string }[] = [
@@ -234,7 +235,6 @@ export default function IncidenciaDetalle() {
           </Text>
         </Animated.View>
       </Animated.View>
-
       {/* ── Contenido ── */}
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
