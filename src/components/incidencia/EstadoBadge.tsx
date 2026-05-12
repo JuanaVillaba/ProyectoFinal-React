@@ -12,31 +12,20 @@ type Props = {
 };
 
 export default function EstadoBadge({
-  estado,
-  variant = 'pill',
-  size    = 'md',
-}: Props) {
-  const meta    = ESTADO_META[estado];
-  const isSolid = variant === 'solid';
-  const isSm    = size === 'sm';
-
-  const bgColor  = isSolid ? meta.color : meta.color + '20';
-  const txtColor = isSolid ? '#fff'     : meta.color;
+  estado, size = 'md' }: { estado: string, size?: 'sm' | 'md' }) {
+  
+  // 🛡️ PROTECCIÓN TOTAL: 
+  // Si 'estado' no existe en tus constantes, usamos 'pendiente' como plan B.
+  // Esto evita que la app intente leer .color de algo que no existe.
+  const meta = ESTADO_META[estado as keyof typeof ESTADO_META] || ESTADO_META.pendiente;
 
   return (
-    <View
-      style={[
-        styles.badge,
-        {
-          backgroundColor:   bgColor,
-          borderColor:       isSolid ? 'transparent' : meta.color + '50',
-          paddingHorizontal: isSm ? 7  : 10,
-          paddingVertical:   isSm ? 3  : 5,
-        },
-      ]}
-    >
-      <Ionicons name={meta.icon as any} size={isSm ? 10 : 12} color={txtColor} />
-      <Text style={[styles.label, { color: txtColor, fontSize: isSm ? 10 : 12 }]}>
+    <View style={[
+      styles.badge, 
+      { backgroundColor: meta.color + '22', borderColor: meta.color }, 
+      size === 'sm' && styles.badgeSm
+    ]}>
+      <Text style={[styles.text, { color: meta.color }, size === 'sm' && styles.textSm]}>
         {meta.label}
       </Text>
     </View>
@@ -55,5 +44,18 @@ const styles = StyleSheet.create({
   label: {
     fontWeight:    '700',
     letterSpacing:  0.2,
+  },
+   badgeSm: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  textSm: {
+    fontSize: 10,
   },
 });

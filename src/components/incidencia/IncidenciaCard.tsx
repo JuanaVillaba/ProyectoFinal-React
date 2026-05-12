@@ -9,11 +9,17 @@ import {
   ESTADO_META,
   PRIORIDAD_META,
 } from '@/features/incidencias/incidencia.store';
-
-type Props = Pick<
-  Incidencia,
-  'id' | 'titulo' | 'descripcion' | 'estado' | 'fecha' | 'servicio' | 'prioridad'
->;
+import { supabase } from '@/supabase/supabase';
+type Props = {
+  id: string;
+  title: string;        // antes era titulo
+  description: string;  // antes era descripcion
+  status: string;       // antes era estado
+  created_at: string;   // antes era fecha
+  type: string;         // lo usaremos para 'servicio'
+  // prioridad: string; // Nota: No veo 'prioridad' en tu imagen de tabla, 
+                        // si no existe, la quitamos o le damos un default.
+};
 
 function fechaRelativa(isoStr: string): string {
   const diff  = Date.now() - new Date(isoStr).getTime();
@@ -28,13 +34,16 @@ function fechaRelativa(isoStr: string): string {
 }
 
 export default function IncidenciaCard({
-  id, titulo, descripcion, estado, fecha, servicio, prioridad,
+  id, title, description, status, type, created_at,
 }: Props) {
   const router    = useRouter();
-  const scale     = useRef(new Animated.Value(1)).current;
-  const estadoMeta = ESTADO_META[estado];
-  const priMeta   = PRIORIDAD_META[prioridad];
+  const scale     = useRef(new Animated.Value(1)).current
 
+  const estadoClave = (status?.toLowerCase() || 'pendiente') as keyof typeof ESTADO_META;
+  const estadoMeta = ESTADO_META[estadoClave] || ESTADO_META.pendiente;
+
+  //const prioridadClave = (priority?.toLowerCase() || 'baja') as keyof typeof PRIORIDAD_META;
+  //const priMeta = PRIORIDAD_META[prioridadClave] || PRIORIDAD_META.baja;
   const onPressIn  = () =>
     Animated.spring(scale, { toValue: 0.972, useNativeDriver: true, speed: 50 }).start();
   const onPressOut = () =>
@@ -53,34 +62,29 @@ export default function IncidenciaCard({
         <View style={styles.body}>
           {/* Fila superior */}
           <View style={styles.topRow}>
-            <Text style={styles.titulo} numberOfLines={1}>{titulo}</Text>
-            <EstadoBadge estado={estado} size="sm" />
+            <Text style={styles.titulo} numberOfLines={1}>{title}</Text>
+            <EstadoBadge estado={estadoClave} size="sm" />
           </View>
 
           {/* Descripción */}
-          <Text style={styles.descripcion} numberOfLines={2}>{descripcion}</Text>
+          <Text style={styles.descripcion} numberOfLines={2}>{description}</Text>
 
           {/* Footer */}
           <View style={styles.footer}>
             {/* Servicio */}
             <View style={styles.chip}>
               <Ionicons name="layers-outline" size={11} color={COLORS.textMuted} />
-              <Text style={styles.chipText}>{servicio}</Text>
+              <Text style={styles.chipText}>{type}</Text>
             </View>
 
             {/* Prioridad */}
-            <View style={[styles.chip, { borderColor: priMeta.color + '44' }]}>
-              <Ionicons name={priMeta.icon as any} size={11} color={priMeta.color} />
-              <Text style={[styles.chipText, { color: priMeta.color }]}>
-                {priMeta.label}
-              </Text>
-            </View>
+            
 
             <View style={{ flex: 1 }} />
 
             {/* Fecha relativa */}
             <Ionicons name="time-outline" size={11} color={COLORS.textMuted} />
-            <Text style={styles.fecha}>{fechaRelativa(fecha)}</Text>
+            <Text style={styles.fecha}>{fechaRelativa(created_at)}</Text>
             <Ionicons name="chevron-forward" size={14} color={COLORS.textMuted} />
           </View>
         </View>
@@ -151,3 +155,9 @@ const styles = StyleSheet.create({
     color:    COLORS.textMuted,
   },
 });
+//<View style={[styles.chip, { borderColor: priMeta.color + '44' }]}>
+            //  <Ionicons name={priMeta.icon as any} size={11} color={priMeta.color} />
+            //  <Text style={[styles.chipText, { color: priMeta.color }]}>
+            //    {priMeta.label}
+            //  </Text>
+            //</View>

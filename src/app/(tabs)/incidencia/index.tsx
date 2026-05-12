@@ -6,13 +6,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import IncidenciaCard from '@/components/incidencia/IncidenciaCard';
-import {
-  useIncidenciaStore,
-  EstadoIncidencia,
-  COLORS,
-  ESTADO_META,
-} from '@/features/incidencias/incidencia.store';
-
+import {useIncidenciaStore,EstadoIncidencia,COLORS,ESTADO_META,} from '@/features/incidencias/incidencia.store';
+import { supabase } from '@/supabase/supabase';
 // ─── Filtros ──────────────────────────────────────────────────────────────────
 type Filtro = 'todos' | EstadoIncidencia;
 
@@ -99,26 +94,49 @@ const emp = StyleSheet.create({
 
 // ─── Pantalla principal ───────────────────────────────────────────────────────
 export default function IncidenciasScreen() {
+
+  const [datos, setDatos] = useState<any[]>([]);
+  
+  const [loadingDb, setLoadingDb] = useState(true);
+  useEffect(() => {
+    async function obtenerDatos() {
+      setLoadingDb(true);
+    
+    // 1. Forzamos un log para saber si la función se ejecuta
+    console.log("Intentando conectar con Supabase...");
+      const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      console.log("No hay usuario logueado, por eso sale vacío");
+      setLoadingDb(false);
+      return;
+    }
+      const { data, error } = await supabase.from('incidents').select('*');
+      console.log("Datos de Supabase:", data);
+      if (error) console.error(error);
+      else setDatos(data || []);
+      setLoadingDb(false);
+    }
+    obtenerDatos();
+  }, []);
+
   const router  = useRouter();
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro]     = useState<Filtro>('todos');
   const fabScale = useRef(new Animated.Value(1)).current;
 
-  // Store
-  const incidencias = useIncidenciaStore((s) => s.incidencias);
-  const loading     = useIncidenciaStore((s) => s.loading);
-
   // Filtrado local
-  const data = incidencias.filter((i) => {
+  const data = datos.filter((i) => {
     const okEstado  = filtro === 'todos' || i.estado === filtro;
-    const q         = busqueda.toLowerCase();
-    const okBusqueda = !q || i.titulo.toLowerCase().includes(q) || i.servicio.toLowerCase().includes(q);
+
+  const q = busqueda.toLowerCase();
+   const okBusqueda = !q || i.title?.toLowerCase().includes(q);
     return okEstado && okBusqueda;
   });
 
   // Conteos para los chips
   const count = (k: Filtro) =>
-    k === 'todos' ? incidencias.length : incidencias.filter((i) => i.estado === k).length;
+    k === 'todos' ? datos.length : datos.filter((i) => i.estado === k).length;
 
   const onFabPress = () => {
     Animated.sequence([
@@ -136,7 +154,7 @@ export default function IncidenciasScreen() {
           <Text style={styles.title}>Incidentes</Text>
         </View>
         <View style={styles.totalBadge}>
-          <Text style={styles.totalText}>{incidencias.length}</Text>
+          <Text style={styles.totalText}>{datos.length}</Text>
         </View>
       </View>
 
@@ -189,21 +207,30 @@ export default function IncidenciasScreen() {
       </ScrollView>
 
       {/* ── Lista / Skeleton ── */}
-      {loading ? (
+      {loadingDb ? (
         <View style={styles.skeletonWrap}>
-          {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
-        </View>
-      ) : (
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={<EmptyState busqueda={busqueda} filtro={filtro} />}
-          renderItem={({ item, index }) => (
-            <AnimatedCard index={index}>
-              <IncidenciaCard {...item} />
-            </AnimatedCard>
+    {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+  </View>
+) : (
+  <FlatList
+    data={data} // <--- Estos son los datos que vienen de Supabase
+    keyExtractor={(item) => item.id.toString()}
+    contentContainerStyle={styles.listContent}
+    showsVerticalScrollIndicator={false}
+    ListEmptyComponent={<EmptyState busqueda={busqueda} filtro={filtro} />}
+    renderItem={({ item, index }) => (
+      <AnimatedCard index={index}>
+        {/* Aquí es donde USAS el molde Card y le pasas la info de la DB */}
+        <IncidenciaCard 
+          id={item.id}
+          title={item.title}
+          description={item.description}
+          status={item.status || 'pendiente'}
+          created_at={item.created_at} 
+          type={item.type}
+          //prioridad={item.prioridad}
+        />
+      </AnimatedCard>
           )}
         />
       )}
