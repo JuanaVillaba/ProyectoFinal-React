@@ -107,7 +107,7 @@ const QUICK_ACTIONS: QuickAction[] = [
 const INCIDENCIAS: Incidencia[] = [
   {
     id:        '1',
-    titulo:    'Sin agua caliente - Piso 3',
+    titulo:    'liente - Piso 3',
     numero:    '#1245',
     tiempo:    'hace 2 h',
     estado:    'en_proceso',
