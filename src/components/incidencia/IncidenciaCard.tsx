@@ -34,11 +34,12 @@ export default function IncidenciaCard({
   const scale     = useRef(new Animated.Value(1)).current;
   const estadoMeta = ESTADO_META[estado];
   const priMeta   = PRIORIDAD_META[prioridad];
+  console.log(estadoMeta, estado)
 
   const onPressIn  = () =>
-    Animated.spring(scale, { toValue: 0.972, useNativeDriver: true, speed: 50 }).start();
+    Animated.spring(scale, { toValue: 0.972, useNativeDriver: false, speed: 50 }).start();
   const onPressOut = () =>
-    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50 }).start();
+    Animated.spring(scale, { toValue: 1, useNativeDriver: false, speed: 50 }).start();
 
   return (
     <Pressable
@@ -48,7 +49,7 @@ export default function IncidenciaCard({
     >
       <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
         {/* Barra lateral coloreada por estado */}
-        <View style={[styles.accentBar, { backgroundColor: estadoMeta.color }]} />
+        <View  />
 
         <View style={styles.body}>
           {/* Fila superior */}
@@ -69,12 +70,13 @@ export default function IncidenciaCard({
             </View>
 
             {/* Prioridad */}
-            <View style={[styles.chip, { borderColor: priMeta.color + '44' }]}>
-              <Ionicons name={priMeta.icon as any} size={11} color={priMeta.color} />
-              <Text style={[styles.chipText, { color: priMeta.color }]}>
-                {priMeta.label}
+            <View style={[styles.chip, { borderColor: priMeta?.color + '44' }]}>
+              <Ionicons name={priMeta?.icon as any} size={11} color={priMeta?.color} />
+              <Text style={[styles.chipText, { color: priMeta?.color }]}>
+                {priMeta?.label}
               </Text>
             </View>
+
 
             <View style={{ flex: 1 }} />
 

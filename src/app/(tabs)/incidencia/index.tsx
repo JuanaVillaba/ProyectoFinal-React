@@ -10,8 +10,9 @@ import {
   useIncidenciaStore,
   EstadoIncidencia,
   COLORS,
-  ESTADO_META,
+  ESTADO_META,Incidencia 
 } from '@/features/incidencias/incidencia.store';
+import { supabase } from '@/supabase/supabase';
 
 // ─── Filtros ──────────────────────────────────────────────────────────────────
 type Filtro = 'todos' | EstadoIncidencia;
@@ -29,8 +30,8 @@ function SkeletonCard() {
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(shimmer, { toValue: 1, duration: 800, useNativeDriver: true }),
-        Animated.timing(shimmer, { toValue: 0, duration: 800, useNativeDriver: true }),
+        Animated.timing(shimmer, { toValue: 1, duration: 800, useNativeDriver: false }),
+        Animated.timing(shimmer, { toValue: 0, duration: 800, useNativeDriver: false }),
       ])
     ).start();
   }, []);
@@ -62,8 +63,8 @@ function AnimatedCard({ children, index }: { children: React.ReactNode; index: n
   const translateY = useRef(new Animated.Value(18)).current;
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity,    { toValue: 1, duration: 320, delay: index * 70, useNativeDriver: true }),
-      Animated.timing(translateY, { toValue: 0, duration: 320, delay: index * 70, useNativeDriver: true }),
+      Animated.timing(opacity,    { toValue: 1, duration: 320, delay: index * 70, useNativeDriver: false }),
+      Animated.timing(translateY, { toValue: 0, duration: 320, delay: index * 70, useNativeDriver: false }),
     ]).start();
   }, []);
   return (
@@ -103,10 +104,9 @@ export default function IncidenciasScreen() {
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro]     = useState<Filtro>('todos');
   const fabScale = useRef(new Animated.Value(1)).current;
-
+  
   // Store
-  const incidencias = useIncidenciaStore((s) => s.incidencias);
-  const loading     = useIncidenciaStore((s) => s.loading);
+  const { incidencias, loading, setIncidencias, setLoading, setError } = useIncidenciaStore();
 
   // Filtrado local
   const data = incidencias.filter((i) => {
@@ -122,10 +122,47 @@ export default function IncidenciasScreen() {
 
   const onFabPress = () => {
     Animated.sequence([
-      Animated.timing(fabScale, { toValue: 0.87, duration: 90, useNativeDriver: true }),
-      Animated.timing(fabScale, { toValue: 1,    duration: 90, useNativeDriver: true }),
+      Animated.timing(fabScale, { toValue: 0.87, duration: 90, useNativeDriver: false }),
+      Animated.timing(fabScale, { toValue: 1,    duration: 90, useNativeDriver: false }),
     ]).start(() => router.push('/incidencia/nueva'));
   };
+  
+  const [incidents, setIncidents] = useState([]);
+  
+  useEffect(() => {
+  const cargarIncidentes = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('incidents')
+        .select('*')
+        //.order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const formateados: Incidencia[] = data.map((item) => ({
+          id: item.id.toString(),
+          titulo: item.titulo || 'Sin título',
+          servicio: item.servicio || 'General',
+          descripcion: item.descripcion || '',
+          estado: item.estado as EstadoIncidencia, 
+          prioridad: (item.prioridad || 'media') as any,
+          fecha: item.fecha,
+          imagen: item.imagen,
+        }));
+
+        setIncidencias(formateados);
+      }
+    } catch (err: any) {
+      console.error("Error cargando:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  cargarIncidentes();
+}, []);
 
   return (
     <View style={styles.root}>
@@ -172,7 +209,7 @@ export default function IncidenciasScreen() {
               onPress={() => setFiltro(f.key)}
               style={[
                 styles.chip,
-                active && { backgroundColor: f.color, borderColor: f.color },
+                active && { backgroundColor: f?.color, borderColor: f?.color },
               ]}
             >
               <Text style={[styles.chipLabel, active && { color: '#fff' }]}>
@@ -310,4 +347,4 @@ const styles = StyleSheet.create({
     alignItems:     'center',
     justifyContent: 'center',
   },
-});
+})

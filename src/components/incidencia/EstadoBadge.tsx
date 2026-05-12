@@ -16,12 +16,12 @@ export default function EstadoBadge({
   variant = 'pill',
   size    = 'md',
 }: Props) {
-  const meta    = ESTADO_META[estado];
+  const meta    = ESTADO_META[estado] || ESTADO_META['pendiente'];
   const isSolid = variant === 'solid';
   const isSm    = size === 'sm';
 
-  const bgColor  = isSolid ? meta.color : meta.color + '20';
-  const txtColor = isSolid ? '#fff'     : meta.color;
+  const bgColor  = isSolid ? meta?.color : meta?.color + '20';
+  const txtColor = isSolid ? '#fff'     : meta?.color;
 
   return (
     <View
@@ -29,7 +29,7 @@ export default function EstadoBadge({
         styles.badge,
         {
           backgroundColor:   bgColor,
-          borderColor:       isSolid ? 'transparent' : meta.color + '50',
+          borderColor:       isSolid ? 'transparent' : meta?.color + '50',
           paddingHorizontal: isSm ? 7  : 10,
           paddingVertical:   isSm ? 3  : 5,
         },

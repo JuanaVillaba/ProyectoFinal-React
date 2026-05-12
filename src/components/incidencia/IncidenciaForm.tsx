@@ -122,8 +122,8 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
     setErrors(e);
     if (Object.keys(e).length > 0) return;
     Animated.sequence([
-      Animated.timing(btnScale, { toValue: 0.94, duration: 80, useNativeDriver: true }),
-      Animated.timing(btnScale, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(btnScale, { toValue: 0.94, duration: 80, useNativeDriver: false }),
+      Animated.timing(btnScale, { toValue: 1, duration: 80, useNativeDriver: false }),
     ]).start();
     //onSubmit({ titulo: titulo.trim(), descripcion: descripcion.trim(), servicio, prioridad, imagen });
     try {
@@ -136,14 +136,16 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
         const { data, error } = await supabase
           .from('incidents')
           .insert([{
-            title: titulo.trim(),
-            description: descripcion.trim(),
-            image_url: null,
-            type: servicio,
-            
+            titulo: titulo.trim(),
+            descripcion: descripcion.trim(),
+            imagen: null,
+            servicio: servicio,
             user_id: user.id,
-            
-          }]);
+            prioridad: prioridad,
+            fecha: new Date().toISOString(),
+            estado: 'pendiente',
+          }])
+          .select();
         if (error) console.log("Error:", error);
       
       Alert.alert("Incidencia reportada correctamente");

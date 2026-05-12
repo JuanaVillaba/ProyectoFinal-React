@@ -165,7 +165,7 @@ export default function IncidenciaDetalle() {
   const deleteInc    = useIncidenciaStore((s) => s.deleteIncidencia);
 
   useEffect(() => {
-    Animated.timing(fadeIn, { toValue: 1, duration: 380, useNativeDriver: true }).start();
+    Animated.timing(fadeIn, { toValue: 1, duration: 380, useNativeDriver: false }).start();
   }, []);
 
   if (!incidencia) {
@@ -193,6 +193,22 @@ export default function IncidenciaDetalle() {
   });
 
   const handleDelete = () => {
+    if (!nextEstado) return;
+
+  Alert.alert(
+    'Actualizar estado',
+    `¿Confirmás que el incidente pasó a estado "${ESTADO_META[nextEstado].label}"?`,
+    [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Confirmar',
+        onPress: async () => {
+          await updateEstado(incidencia.id, nextEstado);
+          // Opcional: una notificación de éxito
+        },
+      },
+    ]
+  );
     Alert.alert(
       'Eliminar incidente',
       '¿Confirmás que querés eliminar este incidente? Esta acción no se puede deshacer.',
