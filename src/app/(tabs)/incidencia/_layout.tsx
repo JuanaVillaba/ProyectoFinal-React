@@ -1,18 +1,26 @@
-import React from 'react';
 import { Stack } from 'expo-router';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function RootLayout() {
+/**
+ * Stack navigator para la sección Incidencias.
+ *
+ * RUTAS:
+ *   index   → listado de incidencias       /(tabs)/incidencia
+ *   nueva   → formulario nueva incidencia  /(tabs)/incidencia/nueva
+ *
+ * ⚠️  Sin este archivo, Expo Router no sabe que `incidencia/` es un Stack,
+ *     y termina mostrando solo la última ruta que coincide (nueva.tsx).
+ */
+export default function IncidenciaLayout() {
   return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* Tabs */}
-        <Stack.Screen name="(tabs)" />
-
-        {/* Rutas fuera de tabs */}
-        <Stack.Screen name="incidencia/[id]" options={{ headerShown: true, title: 'Detalle' }} />
-        <Stack.Screen name="incidentes/index" options={{ headerShown: true, title: 'Nueva incidencia' }} />
-      </Stack>
-    </SafeAreaProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen
+        name="nueva"
+        options={{
+          presentation: 'modal',   // sube desde abajo en iOS, slide en Android
+          animation:    'slide_from_bottom',
+        }}
+      />
+    </Stack>
   );
 }
