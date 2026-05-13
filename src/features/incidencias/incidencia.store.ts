@@ -1,6 +1,6 @@
 // features/incidencias/incidencia.store.ts
 // ─── Reemplaza mock.ts por completo ──────────────────────────────────────────
-
+import { supabase } from '@/supabase/supabase';
 import { create } from 'zustand';
 
 // ─── Tipos públicos ────────────────────────────────────────────────────────────
@@ -145,6 +145,8 @@ interface IncidenciaState {
   loading:        boolean;
   error:          string | null;
 
+  setIncidencias:   (data: Incidencia[]) => void;
+
   addIncidencia:    (data: NuevaIncidencia) => void;
   updateEstado:     (id: string, estado: EstadoIncidencia) => void;
   deleteIncidencia: (id: string) => void;
@@ -154,10 +156,12 @@ interface IncidenciaState {
 }
 
 export const useIncidenciaStore = create<IncidenciaState>((set) => ({
-  incidencias: DATA_INICIAL,
+  incidencias: [],
   loading:     false,
   error:       null,
 
+  
+  setIncidencias: (nuevas) => set({ incidencias: nuevas }),
   addIncidencia: (data) =>
     set((state) => ({
       incidencias: [
@@ -172,12 +176,36 @@ export const useIncidenciaStore = create<IncidenciaState>((set) => ({
       ],
     })),
 
-  updateEstado: (id, estado) =>
+  updateEstado: async (id, estado) => {
+    try {
+    const { data, error } = await supabase
+      .from('incidents')
+      .update({ 
+        estado: estado, 
+        fecha_actualizacion: new Date().toISOString() 
+      })
+      .eq('id', id)
+      .select(); // <--- IMPORTANTE: Esto nos devuelve la fila actualizada
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      console.warn("⚠️ No se encontró ninguna fila con el ID:", id);
+      return;
+    }
+
+    console.log("✅ Actualizado en Supabase:", data[0]);
+
+    // Actualizar el estado local solo si la DB respondió bien
     set((state) => ({
       incidencias: state.incidencias.map((i) =>
         i.id === id ? { ...i, estado, fechaActualizacion: new Date().toISOString() } : i
       ),
-    })),
+    }));
+  } catch (error: any) {
+    console.error("❌ Error en updateEstado:", error.message);
+  }
+  },
 
   deleteIncidencia: (id) =>
     set((state) => ({
@@ -201,4 +229,5 @@ export const useIncidenciaStore = create<IncidenciaState>((set) => ({
 
   setLoading: (loading) => set({ loading }),
   setError:   (error)   => set({ error }),
+  
 }));

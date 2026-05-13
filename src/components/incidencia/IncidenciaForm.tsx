@@ -11,11 +11,13 @@ import {
   NuevaIncidencia, PrioridadIncidencia,
   COLORS, PRIORIDAD_META, SERVICIOS,
 } from '@/features/incidencias/incidencia.store';
+import { supabase } from "@/supabase/supabase";
+
 
 type Props = {
-  onSubmit:  (data: NuevaIncidencia) => void;
+  onSubmit: (data: NuevaIncidencia) => void;
   onCancel?: () => void;
-  loading?:  boolean;
+  loading?: boolean;
 };
 type FormErrors = Partial<Record<keyof NuevaIncidencia, string>>;
 
@@ -28,9 +30,9 @@ function Label({ text, required }: { text: string; required?: boolean }) {
   );
 }
 const lbl = StyleSheet.create({
-  row:  { flexDirection: 'row', gap: 3, alignItems: 'center', marginBottom: 8 },
+  row: { flexDirection: 'row', gap: 3, alignItems: 'center', marginBottom: 8 },
   text: { fontSize: 12, fontWeight: '700', color: COLORS.textSecondary, letterSpacing: 0.8, textTransform: 'uppercase' },
-  req:  { fontSize: 12, color: COLORS.danger, fontWeight: '700' },
+  req: { fontSize: 12, color: COLORS.danger, fontWeight: '700' },
 });
 
 function ErrorMsg({ msg }: { msg?: string }) {
@@ -43,20 +45,20 @@ function ErrorMsg({ msg }: { msg?: string }) {
   );
 }
 const err = StyleSheet.create({
-  row:  { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 5 },
   text: { fontSize: 12, color: COLORS.danger },
 });
 
 export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
-  const [titulo,      setTitulo]      = useState('');
+  const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [servicio,    setServicio]    = useState('');
-  const [prioridad,   setPrioridad]   = useState<PrioridadIncidencia>('media');
-  const [imagen,      setImagen]      = useState<string | null>(null);
-  const [errors,      setErrors]      = useState<FormErrors>({});
-  const [submitted,   setSubmitted]   = useState(false);
+  const [servicio, setServicio] = useState('');
+  const [prioridad, setPrioridad] = useState<PrioridadIncidencia>('media');
+  const [imagen, setImagen] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const descRef  = useRef<TextInput>(null);
+  const descRef = useRef<TextInput>(null);
   const btnScale = useRef(new Animated.Value(1)).current;
 
   // ── Image picker ────────────────────────────────────────────────────────────
@@ -92,10 +94,10 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
   // ── Validación ──────────────────────────────────────────────────────────────
   function validate(): FormErrors {
     const e: FormErrors = {};
-    if (!titulo.trim())      e.titulo      = 'El título es obligatorio';
-    if (titulo.length > 80)  e.titulo      = 'Máximo 80 caracteres';
+    if (!titulo.trim()) e.titulo = 'El título es obligatorio';
+    if (titulo.length > 80) e.titulo = 'Máximo 80 caracteres';
     if (!descripcion.trim()) e.descripcion = 'Describí el problema brevemente';
-    if (!servicio)           e.servicio    = 'Seleccioná un servicio';
+    if (!servicio) e.servicio = 'Seleccioná un servicio';
     return e;
   }
 
@@ -103,7 +105,7 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
     if (!submitted) return;
     const e = { ...errors };
     if (field === 'titulo') {
-      if (!value.trim())          e.titulo = 'El título es obligatorio';
+      if (!value.trim()) e.titulo = 'El título es obligatorio';
       else if (value.length > 80) e.titulo = 'Máximo 80 caracteres';
       else delete e.titulo;
     }
@@ -114,19 +116,48 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
     setErrors(e);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setSubmitted(true);
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length > 0) return;
     Animated.sequence([
-      Animated.timing(btnScale, { toValue: 0.94, duration: 80, useNativeDriver: true }),
-      Animated.timing(btnScale, { toValue: 1,    duration: 80, useNativeDriver: true }),
+      Animated.timing(btnScale, { toValue: 0.94, duration: 80, useNativeDriver: false }),
+      Animated.timing(btnScale, { toValue: 1, duration: 80, useNativeDriver: false }),
     ]).start();
-    onSubmit({ titulo: titulo.trim(), descripcion: descripcion.trim(), servicio, prioridad, imagen });
+    //onSubmit({ titulo: titulo.trim(), descripcion: descripcion.trim(), servicio, prioridad, imagen });
+    try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (!user) {
+          Alert.alert("Error", "Debes estar autenticado para reportar una incidencia");
+          return;
+        }
+        const { data, error } = await supabase
+          .from('incidents')
+          .insert([{
+            titulo: titulo.trim(),
+            descripcion: descripcion.trim(),
+            imagen: null,
+            servicio: servicio,
+            user_id: user.id,
+            prioridad: prioridad,
+            fecha: new Date().toISOString(),
+            estado: 'pendiente',
+          }])
+          .select();
+        if (error) console.log("Error:", error);
+      
+      Alert.alert("Incidencia reportada correctamente");
+      onSubmit({ titulo, descripcion, servicio, prioridad, imagen });
+
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "No se pudo guardar la incidencia");
+    }
   }
 
   const prioridades: PrioridadIncidencia[] = ['baja', 'media', 'alta', 'critica'];
+
 
   return (
     <KeyboardAvoidingView
@@ -168,7 +199,7 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
               return (
                 <Pressable
                   key={s}
-                  onPress={() => { setServicio(s); if (submitted) setErrors((e) => { const n = {...e}; delete n.servicio; return n; }); }}
+                  onPress={() => { setServicio(s); if (submitted) setErrors((e) => { const n = { ...e }; delete n.servicio; return n; }); }}
                   style={[styles.chip, active && { backgroundColor: COLORS.accent, borderColor: COLORS.accent }]}
                 >
                   <Text style={[styles.chipText, active && { color: '#fff' }]}>{s}</Text>
@@ -227,7 +258,7 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
           <Label text="Prioridad" />
           <View style={styles.prioGrid}>
             {prioridades.map((p) => {
-              const meta   = PRIORIDAD_META[p];
+              const meta = PRIORIDAD_META[p];
               const active = prioridad === p;
               return (
                 <Pressable
@@ -278,30 +309,30 @@ export default function IncidenciaForm({ onSubmit, onCancel, loading }: Props) {
 }
 
 const styles = StyleSheet.create({
-  scroll:  { flex: 1, backgroundColor: COLORS.bg },
+  scroll: { flex: 1, backgroundColor: COLORS.bg },
   content: { padding: 20, gap: 22, paddingBottom: 16 },
-  field:   { gap: 0 },
+  field: { gap: 0 },
 
   inputWrap: {
     backgroundColor: COLORS.surface, borderRadius: 14,
     borderWidth: 1, borderColor: COLORS.border,
     flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14,
   },
-  inputError:   { borderColor: COLORS.danger },
-  input:        { flex: 1, fontSize: 15, color: COLORS.textPrimary, paddingVertical: 13 },
-  charCount:    { fontSize: 11, color: COLORS.textMuted },
+  inputError: { borderColor: COLORS.danger },
+  input: { flex: 1, fontSize: 15, color: COLORS.textPrimary, paddingVertical: 13 },
+  charCount: { fontSize: 11, color: COLORS.textMuted },
   textareaWrap: { alignItems: 'flex-start', paddingVertical: 10 },
-  textarea:     { minHeight: 110, paddingTop: 4 },
+  textarea: { minHeight: 110, paddingTop: 4 },
 
   chipsRow: { gap: 8, paddingVertical: 2 },
-  chip:     { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.surface, borderWidth: 1.5, borderColor: COLORS.border },
+  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, backgroundColor: COLORS.surface, borderWidth: 1.5, borderColor: COLORS.border },
   chipText: { fontSize: 13, fontWeight: '600', color: COLORS.textSecondary },
 
   // Imagen
   previewWrap: { borderRadius: 16, overflow: 'hidden', position: 'relative' },
-  preview:     { width: '100%', height: 200 },
-  removeBtn:   { position: 'absolute', top: 8, right: 8, backgroundColor: '#fff', borderRadius: 14 },
-  imgRow:      { flexDirection: 'row', gap: 10 },
+  preview: { width: '100%', height: 200 },
+  removeBtn: { position: 'absolute', top: 8, right: 8, backgroundColor: '#fff', borderRadius: 14 },
+  imgRow: { flexDirection: 'row', gap: 10 },
   imgBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, backgroundColor: COLORS.surface, borderRadius: 14,
@@ -327,8 +358,8 @@ const styles = StyleSheet.create({
     paddingBottom: Platform.OS === 'ios' ? 28 : 16,
     backgroundColor: COLORS.bg, borderTopWidth: 1, borderTopColor: COLORS.border,
   },
-  btnCancel:     { flex: 1, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
+  btnCancel: { flex: 1, paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: COLORS.border, alignItems: 'center', justifyContent: 'center' },
   btnCancelText: { fontSize: 15, fontWeight: '600', color: COLORS.textSecondary },
-  btnSubmit:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, backgroundColor: COLORS.accent },
+  btnSubmit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 14, backgroundColor: COLORS.accent },
   btnSubmitText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 });
