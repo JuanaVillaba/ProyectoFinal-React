@@ -8,10 +8,10 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useReservaForm }      from "../../hooks/useReservaForm";
-import { SalonSelector }       from "../../components/reservas/SalonSelector";
-import { FechaHorario }        from "../../components/reservas/FrechaHorarios";
-import { Observaciones }       from "../../components/reservas/Observaciones";
+import { useReservaForm } from "../../hooks/useReservaForm";
+import { SalonSelector } from "../../components/reservas/SalonSelector";
+import { FechaHorario } from "../../components/reservas/FrechaHorarios";
+import { Observaciones } from "../../components/reservas/Observaciones";
 import { ResumenConfirmacion } from "../../components/reservas/ResumenConfirmacion";
 
 export function ReservasScreen() {
@@ -21,14 +21,23 @@ export function ReservasScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       {/* Header */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.btnBack}>
           <Ionicons name="arrow-back" size={20} color="#1a1a1a" />
         </TouchableOpacity>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.titulo}>Nueva reserva</Text>
           <Text style={styles.subtitulo}>Torre A · Piso 3 · Depto 3B</Text>
         </View>
+        <TouchableOpacity
+          style={styles.btnMisReservas}
+          onPress={() => router.push("/reservas/mis-reservas")}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="list-outline" size={15} color="#185FA5" />
+          <Text style={styles.btnMisReservasTexto}>Mis reservas</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Contenido scrolleable */}
@@ -140,4 +149,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#fff",
   },
+  btnMisReservas: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 5,
+  backgroundColor: "#E6F1FB",
+  paddingHorizontal: 10,
+  paddingVertical: 7,
+  borderRadius: 8,
+},
+btnMisReservasTexto: {
+  fontSize: 12,
+  fontWeight: "500",
+  color: "#185FA5",
+},
 });
